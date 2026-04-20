@@ -1,7 +1,7 @@
-name: Auto Manga Colorizer
+name: Auto Manga Colorizer Pro
 on:
   push:
-    # سيشتغل عند أي تغيير في أي ملف بالمستودع (كود أو صور)
+    # سيشتغل عند أي تغيير في أي ملف بالمستودع
   workflow_dispatch: 
 
 jobs:
@@ -19,32 +19,21 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: '3.9'
+          cache: 'pip' # تسريع التثبيت في المرات القادمة
 
-      - name: 📦 تثبيت المكتبات اللازمة
+      - name: 📦 تثبيت المكتبات الثقيلة (DeOldify المحرك)
         run: |
           python -m pip install --upgrade pip
-          pip install opencv-python-headless numpy
+          # تثبيت المتطلبات الأساسية للنماذج المتقدمة
+          pip install git+https://github.com/jantic/DeOldify.git fastai==2.7.15 numpy==1.24.4 pillow
 
-      - name: 📥 جلب ملفات الذكاء الاصطناعي (الروابط المجربة)
-        run: |
-          echo "جاري تحميل prototxt..."
-          curl -L -o color.prototxt https://raw.githubusercontent.com/richzhang/colorization/caffe/colorization/models/colorization_deploy_v2.prototxt
-          
-          echo "جاري تحميل pts.npy..."
-          curl -L -o pts.npy https://raw.githubusercontent.com/richzhang/colorization/caffe/colorization/resources/pts_in_hull.npy
-          
-          echo "جاري تحميل caffemodel (122MB)..."
-          curl -L -o color.caffemodel https://storage.openvinotoolkit.org/repositories/datumaro/models/colorization/colorization_release_v2.caffemodel
-          
-          echo "تأكيد تحميل الملفات:"
-          ls -lh
-
-      - name: 🎨 تشغيل محرك التلوين
+      - name: 🎨 تشغيل محرك التلوين الاحترافي
+        # هذا السطر سيشغل كود البايثون المطور الذي يستخدم DeOldify
         run: python colorize.py
 
       - name: 📤 حفظ النتيجة الملونة
         uses: actions/upload-artifact@v4
         with:
-          name: Colorized_Manga_Result
+          name: Colorized_Manga_Result_Pro
           path: result.jpg
           if-no-files-found: warn
