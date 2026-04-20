@@ -1,0 +1,26 @@
+name: Manga Colorize Test
+
+on:
+  workflow_dispatch: # يتيح لك تشغيل التجربة يدوياً بضغطة زر
+
+jobs:
+  colorize:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+
+      - name: Install Dependencies
+        run: |
+          pip install torch torchvision opencv-python numpy
+          # هنا سنقوم لاحقاً بإضافة مكتبة التلوين المحددة
+
+      - name: Run Colorizer
+        run: |
+          echo "هنا سيتم تشغيل سكربت التلوين على الصورة المرفوعة"
+          # python colorize_script.py --input test_page.jpg
