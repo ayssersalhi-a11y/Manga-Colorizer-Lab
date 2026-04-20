@@ -2,7 +2,7 @@ import cv2
 import numpy as np
 import urllib.request
 
-# تحميل ملفات النموذج الجاهزة (Deep Learning)
+# تحميل ملفات النموذج الجاهزةت (Deep Learning)
 prototxt_url = "https://raw.githubusercontent.com/richzhang/colorization/master/models/colorization_deploy_v2.prototxt"
 model_url = "http://eecs.berkeley.edu/~rich.zhang/projects/convolutional_colorization/models/colorization_release_v2.caffemodel"
 points_url = "https://github.com/richzhang/colorization/raw/master/resources/pts_in_hull.npy"
