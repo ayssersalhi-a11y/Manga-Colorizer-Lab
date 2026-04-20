@@ -3,5 +3,6 @@ fastprogress==0.2.1
 opencv-python-headless
 pillow==9.5.0
 numpy<1.24.0
+ffmpeg-python
 yt-dlp
 validators
