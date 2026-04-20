@@ -1,5 +1,7 @@
-fastai==2.7.15
-numpy==1.24.4
+fastai>=2.7.0
+numpy<2.0.0
 pillow
 opencv-python-headless
 ffmpeg-python
+# تثبيت spacy مسبقاً بإصدار مستقر يتوافق مع 3.10
+spacy>=3.5.0
