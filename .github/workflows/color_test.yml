@@ -16,15 +16,18 @@ jobs:
           python-version: '3.10'
           cache: 'pip'
 
-      - name: 📦 تثبيت المكتبات الأساسية
+      - name: 📦 تثبيت المكتبات (الإصدار المتوافق)
         run: |
           python -m pip install --upgrade pip
+          # تثبيت المتطلبات المحددة في requirements.txt
           pip install -r requirements.txt
-          # تحميل كود DeOldify يدوياً وتجاهل التثبيت المكسور
+          
+          # تحميل كود DeOldify يدوياً لتجنب مشاكل التثبيت الرسمية
           git clone https://github.com/jantic/DeOldify.git deoldify_code
           cp -r deoldify_code/deoldify .
 
       - name: 🎨 تشغيل محرك التلوين الاحترافي
+        # ملاحظة: سيقوم هذا السطر بتحميل ملف الأوزان (800MB) تلقائياً عند التشغيل
         run: python colorize.py
 
       - name: 📤 حفظ النتيجة الملونة
@@ -32,3 +35,4 @@ jobs:
         with:
           name: Colorized_Manga_Result_Pro
           path: result.jpg
+          if-no-files-found: error
