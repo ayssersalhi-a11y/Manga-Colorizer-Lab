@@ -6,10 +6,6 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    concurrency:
-      group: ${{ github.workflow }}-${{ github.ref }}
-      cancel-in-progress: true
-
     steps:
       - name: 📥 سحب الكود والصور
         uses: actions/checkout@v4
@@ -17,14 +13,16 @@ jobs:
       - name: 🐍 إعداد بيئة بايثون
         uses: actions/setup-python@v5
         with:
-          python-version: '3.10' # قمنا بترقيتها هنا لحل تعارض spacy
+          python-version: '3.10'
           cache: 'pip'
 
-      - name: 📦 تثبيت المكتبات (الحل الالتفافي)
+      - name: 📦 تثبيت المكتبات الأساسية
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
-          pip install --no-deps git+https://github.com/jantic/DeOldify.git
+          # تحميل كود DeOldify يدوياً وتجاهل التثبيت المكسور
+          git clone https://github.com/jantic/DeOldify.git deoldify_code
+          cp -r deoldify_code/deoldify .
 
       - name: 🎨 تشغيل محرك التلوين الاحترافي
         run: python colorize.py
@@ -34,4 +32,3 @@ jobs:
         with:
           name: Colorized_Manga_Result_Pro
           path: result.jpg
-          if-no-files-found: warn
