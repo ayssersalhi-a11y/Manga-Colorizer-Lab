@@ -1,22 +1,26 @@
-from deoldify import device
-from deoldify.device_id import DeviceId
-import torch
-
-# إجبار المحرك على استخدام المعالج (CPU) ليتوافق مع مواصفات GitHub Actions المجانية
-device.set_ptr_to_memory(DeviceId.CPU)
-
-from deoldify.visualize import *
-import os
 import sys
-import warnings
+import os
 
-# تجاهل التحذيرات غير الضرورية لتنظيف سجل التشغيل (Logs)
-warnings.filterwarnings("ignore", category=UserWarning)
+# إضافة المسار الحالي لضمان عثور بايثون على مجلد deoldify المحلي
+sys.path.append(os.getcwd())
 
 try:
-    # 1. البحث عن الصورة المراد تلوينها في المستودع
+    from deoldify import device
+    from deoldify.device_id import DeviceId
+    import torch
+    
+    # إجبار المحرك على استخدام المعالج (CPU)
+    device.set_ptr_to_memory(DeviceId.CPU)
+    
+    from deoldify.visualize import *
+    import warnings
+
+    # تجاهل التحذيرات لتنظيف سجل التشغيل
+    warnings.filterwarnings("ignore", category=UserWarning)
+
+    # 1. البحث عن الصورة المراد تلوينها
     valid_extensions = ('.jpg', '.jpeg', '.png')
-    image_path = next((f for f in os.listdir('.') if f.lower().endswith(valid_extensions) and f != "result.jpg"), None)
+    image_path = next((f for f in os.listdir('.') if f.lower().endswith(valid_extensions) and f != "result.jpg" and not f.startswith('.')), None)
 
     if not image_path:
         print("❌ خطأ: لم يتم العثور على أي صورة (jpg, png) في المستودع!")
@@ -25,11 +29,11 @@ try:
     print(f"🚀 البدء بتلوين الصورة باستخدام DeOldify: {image_path}")
 
     # 2. تحميل المحرك الفني (Artistic)
-    # ملاحظة: سيقوم الأكسيون بتحميل ملفات الأوزان (Weights) في المرة الأولى تلقائياً
+    # سيقوم النظام بتحميل ملف الأوزان (Weights) تلقائياً (حوالي 800MB)
     colorizer = get_image_colorizer(artistic=True)
 
     # 3. معالجة الصورة
-    # render_factor=35 هو توازن ممتاز بين الجودة واستهلاك الرام (7 جيجا المتاحة)
+    # render_factor=35 هو توازن ممتاز لمواصفات رام GitHub
     result_img = colorizer.get_transformed_image(
         image_path, 
         render_factor=35, 
@@ -43,4 +47,7 @@ try:
 
 except Exception as e:
     print(f"❌ حدث خطأ في المحرك المطور: {e}")
+    # طباعة تفاصيل الخطأ للمساعدة في التصحيح إذا لزم الأمر
+    import traceback
+    traceback.print_exc()
     sys.exit(1)
