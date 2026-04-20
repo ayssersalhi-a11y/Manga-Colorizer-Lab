@@ -1,11 +1,8 @@
 name: Auto Manga Colorizer
 on:
   push:
-    paths:
-      - '**.jpg'
-      - '**.png'
-      - '**.jpeg'
-  workflow_dispatch:
+    # سيشتغل الأكسيون عند حدوث أي تغيير (Commit) في أي ملف داخل المستودع
+  workflow_dispatch: # للتشغيل اليدوي دائماً متاح
 
 jobs:
   build:
@@ -29,6 +26,7 @@ jobs:
           pip install opencv-python-headless numpy requests
 
       - name: 🎨 تشغيل محرك التلوين
+        # هنا السكربت الذي وضعناه سابقاً سيبحث تلقائياً عن أي صورة موجودة
         run: python colorize.py
 
       - name: 📤 حفظ النتيجة الملونة
@@ -36,4 +34,4 @@ jobs:
         with:
           name: Colorized_Manga_Result
           path: result.jpg
-          retention-days: 5
+          if-no-files-found: warn # لكي لا يفشل الأكسيون إذا لم يجد صورة، بل يعطي تحذيراً فقط
