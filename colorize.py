@@ -1,64 +1,46 @@
-import cv2
-import numpy as np
+from deoldify import device
+from deoldify.device_id import DeviceId
+import torch
+
+# إجبار المحرك على استخدام المعالج (CPU) ليتوافق مع مواصفات GitHub Actions المجانية
+device.set_ptr_to_memory(DeviceId.CPU)
+
+from deoldify.visualize import *
 import os
 import sys
+import warnings
+
+# تجاهل التحذيرات غير الضرورية لتنظيف سجل التشغيل (Logs)
+warnings.filterwarnings("ignore", category=UserWarning)
 
 try:
-    # التأكد من وجود الملفات
-    if not os.path.exists("color.prototxt") or not os.path.exists("color.caffemodel") or not os.path.exists("pts.npy"):
-        print("❌ الملفات الأساسية مفقودة!")
-        sys.exit(1)
-
-    # البحث عن أي صورة
+    # 1. البحث عن الصورة المراد تلوينها في المستودع
     valid_extensions = ('.jpg', '.jpeg', '.png')
     image_path = next((f for f in os.listdir('.') if f.lower().endswith(valid_extensions) and f != "result.jpg"), None)
 
     if not image_path:
-        print("❌ لم يتم العثور على صورة!")
+        print("❌ خطأ: لم يتم العثور على أي صورة (jpg, png) في المستودع!")
         sys.exit(1)
 
-    print(f"🎨 جاري معالجة: {image_path}")
+    print(f"🚀 البدء بتلوين الصورة باستخدام DeOldify: {image_path}")
 
-    # تحميل النموذج
-    net = cv2.dnn.readNetFromCaffe("color.prototxt", "color.caffemodel")
-    pts = np.load("pts.npy")
+    # 2. تحميل المحرك الفني (Artistic)
+    # ملاحظة: سيقوم الأكسيون بتحميل ملفات الأوزان (Weights) في المرة الأولى تلقائياً
+    colorizer = get_image_colorizer(artistic=True)
 
-    # إصلاح مشكلة الـ Reshape (تغيير طريقة قراءة النقاط لتناسب حجم 626)
-    class8 = net.getLayerId("class8_ab")
-    conv8 = net.getLayerId("conv8_313_rh")
+    # 3. معالجة الصورة
+    # render_factor=35 هو توازن ممتاز بين الجودة واستهلاك الرام (7 جيجا المتاحة)
+    result_img = colorizer.get_transformed_image(
+        image_path, 
+        render_factor=35, 
+        post_process=True
+    )
+
+    # 4. حفظ النتيجة النهائية
+    result_img.save("result.jpg")
     
-    # هنا التعديل: التأكد من تحويل النقاط لشكل (2, 313) ثم (1, 313, 1, 1)
-    pts = pts.transpose().reshape(2, 313, 1, 1)
-    net.getLayer(class8).blobs = [pts.astype("float32")]
-    net.getLayer(conv8).blobs = [np.full([1, 313], 2.606, dtype="float32")]
-
-    # قراءة الصورة ومعالجتها
-    image = cv2.imread(image_path)
-    if image is None:
-        print("❌ فشل في قراءة الصورة!")
-        sys.exit(1)
-        
-    scaled = image.astype("float32") / 255.0
-    lab = cv2.cvtColor(scaled, cv2.COLOR_BGR2LAB)
-
-    # التلوين بالذكاء الاصطناعي
-    resized = cv2.resize(lab, (224, 224))
-    L = cv2.split(resized)[0]
-    L -= 50
-
-    net.setInput(cv2.dnn.blobFromImage(L))
-    ab = net.forward()[0, :, :, :].transpose((1, 2, 0))
-    ab = cv2.resize(ab, (image.shape[1], image.shape[0]))
-
-    L = cv2.split(lab)[0]
-    colorized = np.concatenate((L[:, :, np.newaxis], ab), axis=2)
-    colorized = cv2.cvtColor(colorized, cv2.COLOR_LAB2BGR)
-    colorized = (255 * colorized).astype("uint8")
-
-    # حفظ النتيجة
-    cv2.imwrite("result.jpg", colorized)
-    print("✅ تم التلوين بنجاح! تفقد الـ Artifacts لتحميل صورتك.")
+    print("✅ تم التلوين باحترافية! الملف الناتج هو: result.jpg")
 
 except Exception as e:
-    print(f"❌ خطأ تقني: {e}")
+    print(f"❌ حدث خطأ في المحرك المطور: {e}")
     sys.exit(1)
