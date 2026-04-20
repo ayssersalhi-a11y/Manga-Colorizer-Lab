@@ -1,7 +1,6 @@
 name: Auto Manga Colorizer
 on:
   push:
-    # سيشتغل عند أي تغيير في أي ملف بالمستودع
   workflow_dispatch: 
 
 jobs:
@@ -25,12 +24,11 @@ jobs:
           python -m pip install --upgrade pip
           pip install opencv-python-headless numpy
 
-      - name: 📥 جلب ملفات الذكاء الاصطناعي (الروابط المصححة)
-        # تم استبدال الروابط لضمان تحميل الملف المصدري وليس صفحة HTML
+      - name: 📥 جلب ملفات الذكاء الاصطناعي (روابط Hugging Face المستقرة)
         run: |
-          curl -L -o color.prototxt https://raw.githubusercontent.com/opencv/opencv_3rdparty/f930e6e5a593322b79a556396e944b25451e0655/colorization_deploy_v2.prototxt
-          curl -L -o color.caffemodel https://github.com/richzhang/colorization/raw/master/colorization/models/colorization_release_v2.caffemodel
-          curl -L -o pts.npy https://github.com/richzhang/colorization/raw/master/colorization/resources/pts_in_hull.npy
+          curl -L -o color.prototxt https://huggingface.co/MohamedLamoushi/MangaColorizerModels/resolve/main/colorization_deploy_v2.prototxt
+          curl -L -o color.caffemodel https://huggingface.co/MohamedLamoushi/MangaColorizerModels/resolve/main/colorization_release_v2.caffemodel
+          curl -L -o pts.npy https://huggingface.co/MohamedLamoushi/MangaColorizerModels/resolve/main/pts_in_hull.npy
 
       - name: 🎨 تشغيل محرك التلوين
         run: python colorize.py
