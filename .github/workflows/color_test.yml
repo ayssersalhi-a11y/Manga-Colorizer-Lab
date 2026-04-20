@@ -1,7 +1,7 @@
 name: Manga Colorize Test
 
-on:
-  workflow_dispatch: # يتيح لك تشغيل التجربة يدوياً بضغطة زر
+on: 
+  workflow_dispatch: # للتشغيل اليدوي
 
 jobs:
   colorize:
@@ -15,12 +15,14 @@ jobs:
         with:
           python-version: '3.9'
 
-      - name: Install Dependencies
-        run: |
-          pip install torch torchvision opencv-python numpy
-          # هنا سنقوم لاحقاً بإضافة مكتبة التلوين المحددة
+      - name: Install OpenCV & Requirements
+        run: pip install opencv-python numpy
 
-      - name: Run Colorizer
-        run: |
-          echo "هنا سيتم تشغيل سكربت التلوين على الصورة المرفوعة"
-          # python colorize_script.py --input test_page.jpg
+      - name: Run Colorization Script
+        run: python colorize.py
+
+      - name: Upload Result Image
+        uses: actions/upload-artifact@v4
+        with:
+          name: colored-result
+          path: result.jpg
