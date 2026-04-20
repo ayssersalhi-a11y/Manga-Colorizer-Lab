@@ -1,42 +1,25 @@
 import cv2
 import numpy as np
-import urllib.request
 import os
 import sys
 
-# روابط مباشرة ومستقرة تماماً
-prototxt_url = "https://raw.githubusercontent.com/opencv/opencv_3rdparty/f930e6e5a593322b79a556396e944b25451e0655/colorization_deploy_v2.prototxt"
-model_url = "https://github.com/richzhang/colorization/raw/master/colorization/models/colorization_release_v2.caffemodel"
-points_url = "https://github.com/richzhang/colorization/raw/master/colorization/resources/pts_in_hull.npy"
-
-def download_file(url, filename):
-    print(f"📥 جاري جلب: {filename}...")
-    opener = urllib.request.build_opener()
-    opener.addheaders = [('User-agent', 'Mozilla/5.0')]
-    urllib.request.install_opener(opener)
-    urllib.request.urlretrieve(url, filename)
-
 try:
-    # تنزيل الملفات اللازمة
-    download_file(prototxt_url, "color.prototxt")
-    download_file(model_url, "color.caffemodel")
-    download_file(points_url, "pts.npy")
-
-    # البحث عن صورة في المستودع
-    valid_extensions = ('.jpg', '.jpeg', '.png')
-    image_path = None
-    for file in os.listdir('.'):
-        if file.lower().endswith(valid_extensions) and file != "result.jpg":
-            image_path = file
-            break
-
-    if not image_path:
-        print("❌ لم أجد أي صورة (jpg/png) في المستودع!")
+    # التأكد من وجود الملفات التي حملها الأكسيون
+    if not os.path.exists("color.prototxt") or not os.path.exists("color.caffemodel"):
+        print("❌ الملفات الأساسية مفقودة!")
         sys.exit(1)
 
-    print(f"🎨 سأقوم بتلوين: {image_path}")
+    # البحث عن صورة
+    valid_extensions = ('.jpg', '.jpeg', '.png')
+    image_path = next((f for f in os.listdir('.') if f.lower().endswith(valid_extensions) and f != "result.jpg"), None)
 
-    # محرك التلوين
+    if not image_path:
+        print("❌ لم يتم العثور على صورة!")
+        sys.exit(1)
+
+    print(f"🎨 جاري معالجة: {image_path}")
+
+    # المحرك
     net = cv2.dnn.readNetFromCaffe("color.prototxt", "color.caffemodel")
     pts = np.load("pts.npy")
     class8 = net.getLayerId("class8_ab")
@@ -62,8 +45,8 @@ try:
     colorized = (255 * colorized).astype("uint8")
 
     cv2.imwrite("result.jpg", colorized)
-    print("✅ تم بنجاح! النتيجة محفوظة في result.jpg")
+    print("✅ تم التلوين بنجاح!")
 
 except Exception as e:
-    print(f"❌ حدث خطأ غير متوقع: {e}")
+    print(f"❌ خطأ: {e}")
     sys.exit(1)
