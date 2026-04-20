@@ -1,28 +1,43 @@
-name: Manga Colorize Test
-
-on: 
-  workflow_dispatch: # للتشغيل اليدوي
+name: Auto Manga Colorizer
+# التفعيل التلقائي عند رفع أي ملف جديد
+on:
+  push:
+    paths:
+      - '**.jpg'
+      - '**.png'
+      - '**.jpeg'
+  workflow_dispatch: # نترك هذا الخيار متاحاً للتشغيل اليدوي أيضاً للطوارئ
 
 jobs:
-  colorize:
+  build:
     runs-on: ubuntu-latest
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v3
+    
+    # حماية لمنع تشغيل الأكشن مرتين في نفس الوقت
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}
+      cancel-in-progress: true
 
-      - name: Set up Python
-        uses: actions/setup-python@v4
+    steps:
+      - name: 📥 سحب الكود والصور
+        uses: actions/checkout@v4
+
+      - name: 🐍 إعداد بيئة بايثون
+        uses: actions/setup-python@v5
         with:
           python-version: '3.9'
+          cache: 'pip' # تسريع العمليات المستقبلية
 
-      - name: Install OpenCV & Requirements
-        run: pip install opencv-python numpy
+      - name: 📦 تثبيت المكتبات اللازمة
+        run: |
+          python -m pip install --upgrade pip
+          pip install opencv-python-headless numpy requests
 
-      - name: Run Colorization Script
+      - name: 🎨 تشغيل محرك التلوين
         run: python colorize.py
 
-      - name: Upload Result Image
+      - name: 📤 حفظ النتيجة الملونة
         uses: actions/upload-artifact@v4
         with:
-          name: colored-result
+          name: Colorized_Manga_Result
           path: result.jpg
+          retention-days: 5 # الاحتفاظ بالصورة لمدة 5 أيام فقط لتوفير المساحة
