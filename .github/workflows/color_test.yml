@@ -1,18 +1,15 @@
 name: Auto Manga Colorizer
-# التفعيل التلقائي عند رفع أي ملف جديد
 on:
   push:
     paths:
       - '**.jpg'
       - '**.png'
       - '**.jpeg'
-  workflow_dispatch: # نترك هذا الخيار متاحاً للتشغيل اليدوي أيضاً للطوارئ
+  workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    
-    # حماية لمنع تشغيل الأكشن مرتين في نفس الوقت
     concurrency:
       group: ${{ github.workflow }}-${{ github.ref }}
       cancel-in-progress: true
@@ -25,7 +22,6 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: '3.9'
-          cache: 'pip' # تسريع العمليات المستقبلية
 
       - name: 📦 تثبيت المكتبات اللازمة
         run: |
@@ -40,4 +36,4 @@ jobs:
         with:
           name: Colorized_Manga_Result
           path: result.jpg
-          retention-days: 5 # الاحتفاظ بالصورة لمدة 5 أيام فقط لتوفير المساحة
+          retention-days: 5
