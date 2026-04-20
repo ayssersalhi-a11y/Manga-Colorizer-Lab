@@ -1,8 +1,8 @@
 name: Auto Manga Colorizer
 on:
   push:
-    # سيشتغل الأكسيون عند حدوث أي تغيير (Commit) في أي ملف داخل المستودع
-  workflow_dispatch: # للتشغيل اليدوي دائماً متاح
+    # سيشتغل عند أي تغيير في أي ملف بالمستودع
+  workflow_dispatch: 
 
 jobs:
   build:
@@ -23,10 +23,16 @@ jobs:
       - name: 📦 تثبيت المكتبات اللازمة
         run: |
           python -m pip install --upgrade pip
-          pip install opencv-python-headless numpy requests
+          pip install opencv-python-headless numpy
+
+      - name: 📥 جلب ملفات الذكاء الاصطناعي (الحل القاضي)
+        # استخدمنا curl لتجاوز مشاكل بايثون في الروابط
+        run: |
+          curl -L -o color.prototxt https://raw.githubusercontent.com/opencv/opencv_3rdparty/f930e6e5a593322b79a556396e944b25451e0655/colorization_deploy_v2.prototxt
+          curl -L -o color.caffemodel https://media.githubusercontent.com/media/richzhang/colorization/master/colorization/models/colorization_release_v2.caffemodel
+          curl -L -o pts.npy https://raw.githubusercontent.com/richzhang/colorization/master/colorization/resources/pts_in_hull.npy
 
       - name: 🎨 تشغيل محرك التلوين
-        # هنا السكربت الذي وضعناه سابقاً سيبحث تلقائياً عن أي صورة موجودة
         run: python colorize.py
 
       - name: 📤 حفظ النتيجة الملونة
@@ -34,4 +40,4 @@ jobs:
         with:
           name: Colorized_Manga_Result
           path: result.jpg
-          if-no-files-found: warn # لكي لا يفشل الأكسيون إذا لم يجد صورة، بل يعطي تحذيراً فقط
+          if-no-files-found: warn
