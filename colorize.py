@@ -1,7 +1,7 @@
 import sys
 import os
 import urllib.request
-import torch
+import torch 
 import gc 
 from PIL import Image
 import warnings
